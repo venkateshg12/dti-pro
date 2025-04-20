@@ -1,0 +1,26 @@
+.background {
+    background: linear-gradient(150deg, rgb(43, 43, 158), #ff4c68, #ef8172, #00bfff, crimson, purple);
+    background-size: 400% 400%;
+    background-position: 0% 0%;
+    animation: gradientScrollDown 3s linear infinite reverse;
+}
+
+@keyframes gradientScrollDown {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 0% 100%;
+    }
+}
+
+.back {
+    background: linear-gradient(150deg, rgb(43, 43, 158), #ef8172, #00bfff, crimson, purple);
+    background-size: 300% 300%;
+    background-position: 0% 0%;
+}
+
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(228, 212, 212, 0.9);
+}

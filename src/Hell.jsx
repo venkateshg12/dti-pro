@@ -1,215 +1,120 @@
-import React, { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+// "use client"
+
+import { useState, useEffect } from "react"
 import img1 from "./assets/img1.jpeg"
-import img2 from "./assets/img2.jpeg"
-import img3 from "./assets/img3.jpeg"
-const MixedImageAnimation = ({className}) => {
-    const containerRef = useRef(null);
-    const cubeRef = useRef(null);
-    const imageRefs = useRef([]);
 
-    // Add images to the ref array
-    const addToRefs = (el) => {
-        if (el && !imageRefs.current.includes(el)) {
-            imageRefs.current.push(el);
-        }
-    };
 
-    useEffect(() => {
-        // Store our timeline so we can kill it when component unmounts
-        let mainTimeline;
+const App = ({ onNavigate }) => {
+  const [isMobile, setIsMobile] = useState(false)
 
-        const setupAnimation = () => {
-            // Make sure the refs are populated
-            if (imageRefs.current.length === 3 && containerRef.current && cubeRef.current) {
-                // Kill any existing animation
-                if (mainTimeline) {
-                    mainTimeline.kill();
-                }
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 900)
+    }
 
-                // Reset initial states
-                gsap.set(imageRefs.current[0], { opacity: 1, scale: 1 });
-                gsap.set(imageRefs.current[1], { opacity: 0, scale: 0.7 });
-                gsap.set(imageRefs.current[2], { opacity: 0, scale: 0.7 });
-                gsap.set(cubeRef.current, { rotationY: 0 });
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
-                // Create main timeline that will repeat indefinitely
-                mainTimeline = gsap.timeline({
-                    repeat: -1, // Infinite repetition
-                    repeatDelay: 0.5,
-                });
-
-                // First animation: Zoom transition from image 1 to image 2
-                mainTimeline.to(imageRefs.current[0], {
-                    scale: 1.5,
-                    opacity: 0,
-                    duration: 1.2,
-                    ease: "power2.inOut"
-                });
-
-                mainTimeline.fromTo(imageRefs.current[1],
-                    { scale: 0.7, opacity: 0 },
-                    { scale: 1, opacity: 1, duration: 1.2, ease: "power2.out" },
-                    "-=0.8"
-                );
-
-                // Small pause between animations
-                mainTimeline.to({}, { duration: 1 });
-
-                // Cube rotation to image 3
-                mainTimeline.to(cubeRef.current, {
-                    rotationY: 180,
-                    duration: 1.5,
-                    ease: "power3.inOut",
-                    onStart: () => {
-                        // Prepare for cube rotation by making image 3 visible on back face
-                        gsap.set(imageRefs.current[2], { opacity: 1, scale: 1 });
-                    },
-                    onComplete: () => {
-                        // Hide image 2 after cube rotation
-                        gsap.set(imageRefs.current[1], { opacity: 0 });
-                    }
-                });
-
-                // Small pause 
-                mainTimeline.to({}, { duration: 1 });
-
-                // Back to image 1 with zoom effect
-                mainTimeline.to(cubeRef.current, {
-                    rotationY: 360,
-                    duration: 1.5,
-                    ease: "power3.inOut",
-                    onStart: () => {
-                        // Prepare image 1 on the next face
-                        gsap.set(imageRefs.current[0], { opacity: 1, scale: 0.7 });
-                    },
-                    onComplete: () => {
-                        // Hide image 3 and reset rotation to 0
-                        gsap.set(imageRefs.current[2], { opacity: 0 });
-                        gsap.set(cubeRef.current, { rotationY: 0, duration: 0 });
-                    }
-                });
-
-                // Zoom in on image 1
-                mainTimeline.to(imageRefs.current[0], {
-                    scale: 1,
-                    duration: 1,
-                    ease: "power2.out"
-                });
-            }
-        };
-
-        // Set up the animation once components are mounted
-        setupAnimation();
-
-        // Cleanup
-        return () => {
-            if (mainTimeline) {
-                mainTimeline.kill();
-            }
-        };
-    }, []);
-
-    return (
-        <div className={`animation-wrapper ${className || ' '} `}>
-            <div
-                ref={containerRef}
-                className="animation-container"
-                style={{
-                    position: 'relative',
-                    width: '100%',
-                    height: '400px',
-                    overflow: 'hidden',
-                    borderRadius: '8px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
-                }}
-            >
-                <div
-                    ref={cubeRef}
-                    className="cube"
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        position: 'relative',
-                        transformStyle: 'preserve-3d',
-                        perspective: '1000px'
-                    }}
-                >
-                    {/* First Image */}
-                    <div
-                        className="image-wrapper"
-                        ref={addToRefs}
-                        style={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            backfaceVisibility: 'hidden',
-                            transformStyle: 'preserve-3d',
-                        }}
-                    >
-                        <img
-                            src={img1}
-                            alt="Image 1"
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                            }}
-                        />
-                    </div>
-
-                    {/* Second Image */}
-                    <div
-                        className="image-wrapper"
-                        ref={addToRefs}
-                        style={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            backfaceVisibility: 'hidden',
-                            transformStyle: 'preserve-3d',
-                            opacity: 0
-                        }}
-                    >
-                        <img
-                            src={img2}
-                            alt="Image 2"
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                            }}
-                        />
-                    </div>
-
-                    {/* Third Image */}
-                    <div
-                        className="image-wrapper"
-                        ref={addToRefs}
-                        style={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            backfaceVisibility: 'hidden',
-                            transform: 'rotateY(180deg)',
-                            transformStyle: 'preserve-3d',
-                            opacity: 0
-                        }}
-                    >
-                        <img
-                            src={img3}
-                            alt="Image 3"
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                            }}
-                        />
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="min-h-screen bg-black text-white overflow-hidden">
+      {/* Fixed Top Banner */}
+      <header className="sticky top-0 w-full bg-gray-800 backdrop-blur-md z-50 shadow-lg">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-center relative">
+          <div className="absolute left-4">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Vignan_logo.png/1200px-Vignan_logo.png"
+              alt="Logo"
+              width={50}
+              height={50}
+              className="rounded-full object-cover"
+            />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold">Share Info Online</h1>
         </div>
-    );
-};
+      </header>
 
-export default MixedImageAnimation;
+      {/* Introduction Section - Grid Layout */}
+      <section
+        className="min-h-screen w-full flex items-center justify-center bg-cover bg-center py-16 px-4"
+        style={{
+          backgroundImage: `url('https://media.istockphoto.com/id/1355902675/photo/happy-group-of-young-friends-using-smartphone-in-the-street.jpg?s=612x612&w=0&k=20&c=xWHHT0Bwd_0GzXh_6jB7q0NyCGhcz38wONynPIpp8NM=')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="bg-black/60 p-6 md:p-12 rounded-xl max-w-6xl w-full backdrop-blur-sm">
+          <div className={`${isMobile ? "flex flex-col gap-8" : "grid grid-cols-2 gap-10"} items-center`}>
+            {/* Left Side: Text Content */}
+            <div className={`${isMobile ? "text-center" : "text-left"}`}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                Stay Informed, Stay Ahead
+              </h2>
+              <p className="text-base md:text-lg mb-4 leading-relaxed">
+                Welcome to <span className="font-bold">Global News Hub</span> – your gateway to real-time news from
+                around the world. Discover, share, and explore trending stories with freedom and ease.
+              </p>
+              <p className="text-base md:text-lg leading-relaxed">
+                Get reliable updates on politics, business, technology, sports, and more. Whether you're a reader or a
+                contributor, this is the place where news meets people.
+              </p>
+            </div>
+
+            {/* Right Side: Image */}
+            <div className="w-full flex justify-center">
+              <div className="relative w-full max-w-md overflow-hidden rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-transform duration-500 hover:scale-105">
+                <img
+                  src="https://media.istockphoto.com/id/1355902675/photo/happy-group-of-young-friends-using-smartphone-in-the-street.jpg?s=612x612&w=0&k=20&c=xWHHT0Bwd_0GzXh_6jB7q0NyCGhcz38wONynPIpp8NM="
+                  alt="Global News"
+                  width={500}
+                  height={300}
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Get Started Section */}
+      <section className="min-h-screen w-full flex items-center justify-center py-16 px-4 bg-gradient-to-br from-blue-500 via-pink-500 to-blue-500">
+        <div className="bg-black/60 p-6 md:p-12 rounded-xl max-w-4xl backdrop-blur-sm">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">Join the News Revolution</h2>
+
+          <div className="space-y-4 text-base md:text-lg">
+            <p className="leading-relaxed">
+              In today's fast-paced world, staying updated with the latest news is more important than ever. At{" "}
+              <span className="font-bold">Share Info Online</span>, we empower individuals to explore, share, and engage
+              with real-time global news effortlessly. Whether you're interested in politics, technology, entertainment,
+              or global affairs, our platform provides a seamless and open space for discussions and information
+              exchange.
+            </p>
+
+            <p className="leading-relaxed">
+              By joining our community, you get access to reliable news sources, and the ability to contribute by
+              sharing insights with the world. Whether you are a journalist, a content creator, or just a curious
+              reader, <span className="font-bold">Share Info Online</span> is the perfect place for you.
+            </p>
+
+            <p className="leading-relaxed">
+              Step into a world where information flows freely, where you can stay ahead of breaking stories, and where
+              you can connect with like-minded individuals who value knowledge and truth. Your journey to unlimited
+              information starts here.
+            </p>
+          </div>
+
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={onNavigate}
+              className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 px-8 rounded-lg text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+            >
+              GET STARTED
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+export default App;
