@@ -279,7 +279,7 @@ const App = ({ onNavigate }) => {
               <div className="flex justify-center mt-8">
                 <button
                   className="bg-orange-600 cursor-pointer active:scale-[0.90] hover:bg-orange-700 text-white font-bold py-4 px-8 rounded-lg text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-                ><a href="https://tourmaline-froyo-921d48.netlify.app">
+                ><a href="https://spectacular-conkies-8cd02d.netlify.app">
                     GET STARTED
                   </a>
                 </button>
